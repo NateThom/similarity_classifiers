@@ -1,0 +1,68 @@
+# distributed training
+nodes: 1
+gpus: 2 # I recommend always assigning 1 GPU to 1 node
+nr: 0 # machine nr. in node (0 -- nodes - 1)
+dataparallel: 0 # Use DataParallel instead of DistributedDataParallel
+workers: 12
+dataset_dir: "/home/nthom/Documents/datasets"
+
+# train options
+seed: 512 # sacred handles automatic seeding when passed in the config
+batch_size: 80
+learning_rate: 0.001
+image_size_h: 224
+image_size_w: 224
+start_epoch: 0
+epochs: 100
+dataset: "VGG_Face"
+pretrain: True
+train: True
+val_only: False
+test: False
+save: True
+reload: False
+
+# model options
+#resnet: "resnet18"
+resnet: "resnet50"
+
+# loss options
+optimizer: "Adam"
+scheduler: False
+
+# test output options
+csv_path: "/home/nthom/Documents/similarity_classifiers/outputs/"
+
+# save options
+# method_data_transformations_lr_temperature_patience_projectionDimension_hDimension
+save_name: "resnet50_VGGDataset_224x224_SimCLRTransforms"
+
+# reload options
+model_path: "/home/nthom/Documents/similarity_classifiers/checkpoints/"
+model_file: "epoch=06-Training Loss=0.76878-4096-1024-0.05-3e-05.ckpt"
+
+# data options
+show_batch: False
+image_path: "/home/nthom/Documents/datasets/vgg_face_dataset/"
+image_dir: "images_cropped_224x224/"
+#label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/cropped_vgg_face_identity_labels.csv"
+#label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/vgg_face_224x224_identity_labels.csv"
+label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/vgg_face_224x224_shuffled_identity_labels.csv"
+
+train_size: 1014590
+val_size: 126824
+test_size: 126824
+all_size: 1268238
+n_classes: 2622
+
+#train_size: 585834
+#val_size: 73229
+#test_size: 73229
+#all_size: 732292
+#n_classes: 1515
+
+#train_size: 912484
+#val_size: 195532
+#test_size: 195532
+#all_size: 1303548
+#n_classes: 2622

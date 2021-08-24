@@ -1,0 +1,1 @@
+from .light_cnn import LightCnn
