@@ -37,6 +37,7 @@ save_name: "simclrPretrain_resnet50_VGGDataset_224x224_noTransforms"
 
 # reload options
 reload: True
+simclr_pretrained: True
 #model_path: "/home/nthom/Documents/similarity_classifiers/checkpoints/"
 model_path: "/home/nthom/Documents/simclr/checkpoints/vgg_face/"
 #model_file: "epoch=91-Training Loss=3.46329-resnet50_VGGDataset_224x224_SimCLRTransforms.ckpt"

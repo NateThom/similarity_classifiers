@@ -157,27 +157,28 @@ if __name__ == "__main__":
     pl.seed_everything(args.seed)
 
     if args.reload:
-        # try:
-        #     cl = SimilarityClassifier.load_from_checkpoint(args.model_path + args.model_file, args=args)
-        # except:
-        cl = SimilarityClassifier(args)
-        cl_dict = cl.state_dict()
+        if args.simclr_pretrained:
+            cl = SimilarityClassifier(args)
+            cl_dict = cl.state_dict()
 
-        pretrained_model = ContrastiveLearning.load_from_checkpoint(args.model_path + args.model_file, args=contrastive_args)
-        pretrained_model_dict = pretrained_model.state_dict()
+            pretrained_model = ContrastiveLearning.load_from_checkpoint(args.model_path + args.model_file,
+                                                                        args=contrastive_args)
+            pretrained_model_dict = pretrained_model.state_dict()
 
-        new_model_dict1 = {}
-        new_model_dict2 = {}
-        for pt_item_k, pt_item_v in pretrained_model_dict.items():
-            for cl_item_k, cl_item_v in cl_dict.items():
-                if pt_item_v.shape == cl_item_v.shape:
-                    new_model_dict1[cl_item_k] = cl_item_v
+            new_model_dict1 = {}
+            new_model_dict2 = {}
+            for pt_item_k, pt_item_v in pretrained_model_dict.items():
+                for cl_item_k, cl_item_v in cl_dict.items():
+                    if pt_item_v.shape == cl_item_v.shape:
+                        new_model_dict1[cl_item_k] = cl_item_v
 
-        cl_dict.update(new_model_dict1)
-        cl.load_state_dict(cl_dict)
+            cl_dict.update(new_model_dict1)
+            cl.load_state_dict(cl_dict)
 
-        args.image_size_h = cl.args.image_size_h
-        args.image_size_w = cl.args.image_size_w
+            args.image_size_h = cl.args.image_size_h
+            args.image_size_w = cl.args.image_size_w
+        else:
+            cl = SimilarityClassifier.load_from_checkpoint(args.model_path + args.model_file, args=args)
     else:
         cl = SimilarityClassifier(args)
 
