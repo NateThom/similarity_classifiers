@@ -17,6 +17,7 @@ import torchmetrics
 #my code
 import vgg_face_dataset
 from light_cnn import LightCnn
+from contrastive_learning import ContrastiveLearning
 
 #simclr
 from transformations import TransformsSimCLR
@@ -49,6 +50,7 @@ class SimilarityClassifier(LightningModule):
         images, labels = batch
         preds = self.forward(images)
         train_loss = self.criterion(preds, labels)
+
         self.log("Training Accuracy Batch", self.training_accuracy_metric(preds, labels), on_step=True, on_epoch=True, logger=True, prog_bar=True)
         self.log("Training Loss", train_loss, on_step=True, on_epoch=True, logger=True, prog_bar=True)
         return train_loss
@@ -118,7 +120,9 @@ if __name__ == "__main__":
     wandb_logger = WandbLogger(project="similarity classifiers", entity='unr-mpl')
 
     parser = argparse.ArgumentParser(description="similarity")
+    contrastive_parser = argparse.ArgumentParser(description="contrastive")
     yaml_config = yaml_config_hook("./config.yaml")
+    contrastive_learning_yaml_config = yaml_config_hook("/home/nthom/Documents/contrastive_learning/config/config.yaml")
 
     sweep = False
     if sweep:
@@ -146,15 +150,44 @@ if __name__ == "__main__":
 
         args = parser.parse_args()
 
+    for k, v in contrastive_learning_yaml_config.items():
+        contrastive_parser.add_argument(f"--{k}", default=v, type=type(v))
+    contrastive_args = contrastive_parser.parse_args()
+
     pl.seed_everything(args.seed)
+
+    if args.reload:
+        # try:
+        #     cl = SimilarityClassifier.load_from_checkpoint(args.model_path + args.model_file, args=args)
+        # except:
+        cl = SimilarityClassifier(args)
+        cl_dict = cl.state_dict()
+
+        pretrained_model = ContrastiveLearning.load_from_checkpoint(args.model_path + args.model_file, args=contrastive_args)
+        pretrained_model_dict = pretrained_model.state_dict()
+
+        new_model_dict1 = {}
+        new_model_dict2 = {}
+        for pt_item_k, pt_item_v in pretrained_model_dict.items():
+            for cl_item_k, cl_item_v in cl_dict.items():
+                if pt_item_v.shape == cl_item_v.shape:
+                    new_model_dict1[cl_item_k] = cl_item_v
+
+        cl_dict.update(new_model_dict1)
+        cl.load_state_dict(cl_dict)
+
+        args.image_size_h = cl.args.image_size_h
+        args.image_size_w = cl.args.image_size_w
+    else:
+        cl = SimilarityClassifier(args)
 
     if args.train:
         if args.dataset == "VGG_Face":
             train_dataset = vgg_face_dataset.Att_Dataset(
                 args,
                 fold="training",
-                transform=TransformsSimCLR(size=(args.image_size_h, args.image_size_w)),
-                # transform=None,
+                # transform=TransformsSimCLR(size=(args.image_size_h, args.image_size_w)),
+                transform=None,
             )
             val_dataset = vgg_face_dataset.Att_Dataset(
                 args,
@@ -162,9 +195,10 @@ if __name__ == "__main__":
                 transform=None,
             )
 
-        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers, drop_last=False, shuffle=True)
+        train_loader = DataLoader(train_dataset, batch_size=args.batch_size, num_workers=args.workers, drop_last=False,
+                                  shuffle=True, persistent_workers=True)
         val_loader = DataLoader(val_dataset, batch_size=args.batch_size, num_workers=args.workers, drop_last=False,
-                                  shuffle=False)
+                                  shuffle=False, persistent_workers=True)
 
         if args.show_batch:
             for sampled_batch_images, sampled_batch_labels in train_loader:
@@ -179,10 +213,11 @@ if __name__ == "__main__":
             test_dataset = vgg_face_dataset.Att_Dataset(
                 args,
                 fold="testing",
-                transform=TransformsSimCLR(size=(args.image_size_h, args.image_size_w)),
+                transform=None,
             )
 
-        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.workers, drop_last=False)
+        test_loader = DataLoader(test_dataset, batch_size=args.batch_size, num_workers=args.workers, drop_last=False,
+                                 shuffle=False, persistent_workers=True)
 
         if args.show_batch:
             for sampled_batch_images, sampled_batch_labels in test_loader:
@@ -193,11 +228,6 @@ if __name__ == "__main__":
                 plt.show()
                 # if i_batch == 10:
                 #     print()
-
-    if args.reload:
-        cl = SimilarityClassifier.load_from_checkpoint(args.model_path + args.model_file, args=args)
-    else:
-        cl = SimilarityClassifier(args)
 
     if args.save == True:
         checkpoint_callback = ModelCheckpoint(
