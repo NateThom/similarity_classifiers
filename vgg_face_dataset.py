@@ -11,6 +11,7 @@ class Att_Dataset(Dataset):
             upper_bound = args.train_size
             # upper_bound = 107304
             # upper_bound = 59971
+            # upper_bound = 2090
             # upper_bound = 1154
         elif fold == "validation":
             lower_bound = args.train_size
@@ -53,8 +54,8 @@ class Att_Dataset(Dataset):
         labels = self.img_labels.iloc[idx,]
         labels = torch.squeeze(torch.tensor(labels))
 
-        if image.shape[0] != 3:
-            image = image.repeat(3, 1, 1)
+        # if image.shape[0] != 3:
+        #     image = image.repeat(3, 1, 1)
 
         if self.transform:
             image = self.transform(image)

@@ -1,15 +1,15 @@
 # distributed training
 nodes: 1
-gpus: 2 # I recommend always assigning 1 GPU to 1 node
+gpus: -1 # I recommend always assigning 1 GPU to 1 node
 nr: 0 # machine nr. in node (0 -- nodes - 1)
 dataparallel: 0 # Use DataParallel instead of DistributedDataParallel
 workers: 12
 dataset_dir: "/home/nthom/Documents/datasets"
 
 # train options
-seed: 512 # sacred handles automatic seeding when passed in the config
-batch_size: 80
-learning_rate: 0.001
+seed: 3 # sacred handles automatic seeding when passed in the config
+batch_size: 128
+learning_rate: 0.0001
 image_size_h: 224
 image_size_w: 224
 start_epoch: 0
@@ -19,8 +19,6 @@ pretrain: True
 train: True
 val_only: False
 test: False
-save: True
-reload: False
 
 # model options
 #resnet: "resnet18"
@@ -34,20 +32,24 @@ scheduler: False
 csv_path: "/home/nthom/Documents/similarity_classifiers/outputs/"
 
 # save options
-# method_data_transformations_lr_temperature_patience_projectionDimension_hDimension
-save_name: "resnet50_VGGDataset_224x224_SimCLRTransforms"
+save: True
+save_name: "simclrPretrain_resnet50_VGGDataset_224x224_noTransforms"
 
 # reload options
-model_path: "/home/nthom/Documents/similarity_classifiers/checkpoints/"
-model_file: "epoch=06-Training Loss=0.76878-4096-1024-0.05-3e-05.ckpt"
+reload: True
+#model_path: "/home/nthom/Documents/similarity_classifiers/checkpoints/"
+model_path: "/home/nthom/Documents/simclr/checkpoints/vgg_face/"
+#model_file: "epoch=91-Training Loss=3.46329-resnet50_VGGDataset_224x224_SimCLRTransforms.ckpt"
+model_file: "epoch=46-Training Loss=0.02167-512-512-0.05-3e-05.ckpt"
 
 # data options
 show_batch: False
 image_path: "/home/nthom/Documents/datasets/vgg_face_dataset/"
 image_dir: "images_cropped_224x224/"
-#label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/cropped_vgg_face_identity_labels.csv"
-#label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/vgg_face_224x224_identity_labels.csv"
-label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/vgg_face_224x224_shuffled_identity_labels.csv"
+#label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/csvs/vgg_face_224x224_identity_labels.csv"
+label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/csvs/vgg_face_224x224_shuffled_identity_labels.csv"
+#label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/csvs/vgg_face_224x224_identity_labels_45_classes.csv"
+#label_path: "/home/nthom/Documents/similarity_classifiers/misc_code/csvs/vgg_face_224x224_identity_labels_2_classes_shuffled.csv"
 
 train_size: 1014590
 val_size: 126824
@@ -55,14 +57,14 @@ test_size: 126824
 all_size: 1268238
 n_classes: 2622
 
-#train_size: 585834
-#val_size: 73229
-#test_size: 73229
-#all_size: 732292
-#n_classes: 1515
+#train_size: 16812
+#val_size: 2102
+#test_size: 2102
+#all_size: 21016
+#n_classes: 45
 
-#train_size: 912484
-#val_size: 195532
-#test_size: 195532
-#all_size: 1303548
-#n_classes: 2622
+#train_size: 976
+#val_size: 0
+#test_size: 0
+#all_size: 976
+#n_classes: 2
